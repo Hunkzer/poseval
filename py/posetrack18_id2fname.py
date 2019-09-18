@@ -1655,6 +1655,7 @@ def posetrack18_fname2id(fname, frameidx):
       fname: name of the PoseTrack sequence
       frameidx: index of the frame within the sequence
     """
+    print("generating image id from name of the PoseTrack sequence and index of the frame within the sequence")
     tok = os.path.basename(fname).split("_")
     seqidx = int(tok[0])
     seqtype_idx = seqtype2idx(tok[1])

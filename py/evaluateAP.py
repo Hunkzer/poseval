@@ -1,10 +1,7 @@
 import numpy as np
-import json
-import os
-import sys
+from poseval.py import eval_helpers
+from poseval.py.eval_helpers import COCO
 
-import eval_helpers
-from eval_helpers import Joint
 
 def computeMetrics(scoresAll, labelsAll, nGTall):
     apAll = np.zeros((nGTall.shape[0] + 1, 1))
@@ -47,12 +44,12 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveAll=True, bSaveSeq=Fals
     seqidxsUniq = np.unique(seqidxs)
     nSeq = len(seqidxsUniq)
 
-    names = Joint().name
-    names['15'] = 'total'
+    names = COCO().name
+    names['18'] = 'total'
 
     if (bSaveSeq):
         for si in range(nSeq):
-            print "seqidx: %d/%d" % (si+1,nSeq)
+            print("seqidx: %d/%d" % (si+1,nSeq))
 
             # extract frames IDs for the sequence
             imgidxs = np.argwhere(seqidxs == seqidxsUniq[si])
@@ -69,18 +66,22 @@ def evaluateAP(gtFramesAll, prFramesAll, outputDir, bSaveAll=True, bSaveSeq=Fals
             metricsSeq = {'ap': ap.flatten().tolist(), 'pre': pre.flatten().tolist(), 'rec': rec.flatten().tolist(), 'names': names}
 
             filename = outputDir + '/' + seqName + '_AP_metrics.json'
-            print 'saving results to', filename
-            eval_helpers.writeJson(metricsSeq,filename)
+            print('saving results to', filename)
+            eval_helpers.writeJson(metricsSeq, filename)
 
     # assign predicted poses to GT poses
     scoresAll, labelsAll, nGTall, _ = eval_helpers.assignGTmulti(gtFramesAll, prFramesAll, distThresh)
+
+    # print(scoresAll)
+    # print(labelsAll)
+    # print(nGTall)
 
     # compute average precision (AP), precision and recall per part
     apAll, preAll, recAll = computeMetrics(scoresAll, labelsAll, nGTall)
     if (bSaveAll):
         metrics = {'ap': apAll.flatten().tolist(), 'pre': preAll.flatten().tolist(), 'rec': recAll.flatten().tolist(),  'names': names}
         filename = outputDir + '/total_AP_metrics.json'
-        print 'saving results to', filename
-        eval_helpers.writeJson(metrics,filename)
+        print('saving results to', filename)
+        eval_helpers.writeJson(metrics, filename)
 
     return apAll, preAll, recAll

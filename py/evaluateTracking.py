@@ -1,10 +1,7 @@
 import numpy as np
-import json
-import os
-import sys
 
-import eval_helpers
-from eval_helpers import Joint
+from poseval.py import eval_helpers
+from poseval.py.eval_helpers import Joint
 import motmetrics as mm
 
 
@@ -147,7 +144,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
 
             filename = outputDir + '/' + seqName + '_MOT_metrics.json'
             print 'saving results to', filename
-            eval_helpers.writeJson(metricsSeq,filename)
+            eval_helpers.writeJson(metricsSeq, filename)
 
     # compute final metrics per joint for all sequences
     for i in range(nJoints):
@@ -196,7 +193,7 @@ def computeMetrics(gtFramesAll, motAll, outputDir, bSaveAll, bSaveSeq):
 
         filename = outputDir + '/total_MOT_metrics.json'
         print 'saving results to', filename
-        eval_helpers.writeJson(metricsFin,filename)
+        eval_helpers.writeJson(metricsFin, filename)
 
     return metricsFinAll
 

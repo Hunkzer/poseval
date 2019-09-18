@@ -1,9 +1,7 @@
 import numpy as np
-import json
-import os
-import sys
 
-import eval_helpers
+from poseval.py import eval_helpers
+
 
 def computeDist(gtFrames,prFrames):
     assert(len(gtFrames) == len(prFrames))
@@ -28,7 +26,7 @@ def computeDist(gtFrames,prFrames):
                     for pidx in range(len(pointsGT)):
                         pointGT = [pointsGT[pidx]["x"][0],pointsGT[pidx]["y"][0]]
                         idxGT = pointsGT[pidx]["id"][0]
-                        p = eval_helpers.getPointGTbyID(pointsPr,idxGT)
+                        p = eval_helpers.getPointGTbyID(pointsPr, idxGT)
                         if (len(p) > 0 and
                             (type(p["x"][0]) == int or type(p["x"][0]) == float) and
                             (type(p["y"][0]) == int or type(p["y"][0]) == float)):
@@ -36,8 +34,8 @@ def computeDist(gtFrames,prFrames):
                             # compute distance between GT and prediction
                             d = np.linalg.norm(np.subtract(pointGT,pointPr))
                             # compute head size for distance normalization
-                            headSize = eval_helpers.getHeadSize(rectGT["x1"][0],rectGT["y1"][0],
-                                                                rectGT["x2"][0],rectGT["y2"][0])
+                            headSize = eval_helpers.getHeadSize(rectGT["x1"][0], rectGT["y1"][0],
+                                                                rectGT["x2"][0], rectGT["y2"][0])
                             # normalize distance
                             dNorm = d/headSize
                         else:

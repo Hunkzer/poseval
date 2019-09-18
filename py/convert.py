@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 """Convert between COCO and PoseTrack2017 format."""
 # pylint: disable=too-many-branches, too-many-locals, bad-continuation, unsubscriptable-object
-from __future__ import print_function
 
 import json
 import logging
@@ -11,11 +10,11 @@ import os.path as path
 import click
 import numpy as np
 import tqdm
-
-from posetrack18_id2fname import posetrack18_fname2id, posetrack18_id2fname
+from poseval.py import eval_helpers
+from poseval.py.posetrack18_id2fname import posetrack18_fname2id, posetrack18_id2fname
 
 LOGGER = logging.getLogger(__name__)
-POSETRACK18_LM_NAMES_COCO_ORDER = [
+"""POSETRACK18_LM_NAMES_COCO_ORDER = [
     "nose",
     "head_bottom",  # "left_eye",
     "head_top",  # "right_eye",
@@ -33,8 +32,8 @@ POSETRACK18_LM_NAMES_COCO_ORDER = [
     "right_knee",
     "left_ankle",
     "right_ankle",
-]
-POSETRACK18_LM_NAMES = [  # This is used to identify the IDs.
+]"""
+"""POSETRACK18_LM_NAMES = [  # This is used to identify the IDs.
     "right_ankle",
     "right_knee",
     "right_hip",
@@ -50,6 +49,60 @@ POSETRACK18_LM_NAMES = [  # This is used to identify the IDs.
     "head_bottom",
     "nose",
     "head_top",
+]"""
+BODY25_LM_NAMES = [  # This is used to identify the IDs.
+    "nose",
+    "neck",
+    "right_shoulder",
+    "right_elbow",
+    "right_wrist",
+    "left_shoulder",
+    "left_elbow",
+    "left_wrist",
+    "mid_hip",
+    "right_hip",
+    "right_knee",
+    "right_ankle",
+    "left_hip",
+    "left_knee",
+    "left_ankle",
+    "right_eye",
+    "left_eye",
+    "right_ear",
+    "left_ear",
+    "left_big_toe",
+    "left_small_toe",
+    "left_heel",
+    "right_big_toe",
+    "right_small_toe",
+    "right_heel",
+]
+COCO_LM_NAMES = [  # This is used to identify the IDs.
+    "nose",
+    "neck",
+    "right_shoulder",
+    "right_elbow",
+    "right_wrist",
+    "left_shoulder",
+    "left_elbow",
+    "left_wrist",
+    # "mid_hip",
+    "right_hip",
+    "right_knee",
+    "right_ankle",
+    "left_hip",
+    "left_knee",
+    "left_ankle",
+    "right_eye",
+    "left_eye",
+    "right_ear",
+    "left_ear"
+    # "left_big_toe",
+    # "left_small_toe",
+    # "left_heel",
+    # "right_big_toe",
+    # "right_small_toe",
+    # "right_heel",
 ]
 
 SCORE_WARNING_EMITTED = False
@@ -174,14 +227,14 @@ class Video:
         video_id_to_video = {}
         assert len(track_data["categories"]) == 1
         assert track_data["categories"][0]["name"] == "person"
-        assert len(track_data["categories"][0]["keypoints"]) in [15, 17]
+        assert len(track_data["categories"][0]["keypoints"]) in [eval_helpers.COCO().count]
         conversion_table = []
         for lm_name in track_data["categories"][0]["keypoints"]:
-            if lm_name not in POSETRACK18_LM_NAMES:
+            if lm_name not in COCO_LM_NAMES:
                 conversion_table.append(None)
             else:
-                conversion_table.append(POSETRACK18_LM_NAMES.index(lm_name))
-        for lm_idx, lm_name in enumerate(POSETRACK18_LM_NAMES):
+                conversion_table.append(COCO_LM_NAMES.index(lm_name))
+        for lm_idx, lm_name in enumerate(COCO_LM_NAMES):
             assert lm_idx in conversion_table, "Landmark `%s` not found." % (lm_name)
         videos = []
         for image_id in [image["id"] for image in track_data["images"]]:
@@ -466,8 +519,11 @@ class Image:
                 ir_list.append({"point": r_list})
         else:
             ir_list = None
-        imgnum = int(path.basename(self.posetrack_filename).split(".")[0]) + 1
-        return ret, ir_list, imgnum
+        imgnum = path.basename(self.posetrack_filename).split(".")[0]
+        imgnum = str(imgnum).split("_")[0]
+        s = ''.join(x for x in imgnum if x.isdigit())
+        # print(s)
+        return ret, ir_list, int(s)
 
     @classmethod
     def from_old(cls, json_data):
@@ -514,8 +570,10 @@ class Image:
         posetrack_filename = image_info["file_name"]
         # license, coco_url, height, width, date_capture, flickr_url, id are lost.
         old_seq_fp = path.basename(path.dirname(posetrack_filename))
-        old_frame_id = int(path.basename(posetrack_filename).split(".")[0])
-        frame_id = posetrack18_fname2id(old_seq_fp, old_frame_id)
+        # old_frame_id = int(path.basename(posetrack_filename).split(".")[0])
+        # conversion of old_frame_id into new_frame_id is not required when evaluating openpose keypoint data
+        # frame_id = posetrack18_fname2id(old_seq_fp, old_frame_id)
+        frame_id = image_info["id"]
         image = Image(posetrack_filename, frame_id)
         if (
             "ignore_regions_x" in image_info.keys()
@@ -525,6 +583,7 @@ class Image:
                 image_info["ignore_regions_x"],
                 image_info["ignore_regions_y"],
             )
+        # print("returning image: ", image)
         return image
 
 

@@ -1,14 +1,12 @@
-import json
 import os
-import sys
 import numpy as np
 import argparse
 
-from evaluateAP import evaluateAP
-from evaluateTracking import evaluateTracking
+from poseval.py.evaluateAP import evaluateAP
+from poseval.py.evaluateTracking import evaluateTracking
 
-import eval_helpers
-from eval_helpers import Joint
+from poseval.py import eval_helpers
+from poseval.py.eval_helpers import Joint
 
 def parseArgs():
 
@@ -66,7 +64,7 @@ def main():
 
         # print AP
         print "Multiple Object Tracking (MOT) metrics:"
-        eval_helpers.printTable(metrics,motHeader=True)
+        eval_helpers.printTable(metrics, motHeader=True)
 
 if __name__ == "__main__":
    main()
