@@ -1,6 +1,7 @@
 import numpy as np
 from shapely import geometry
 import sys
+import logging
 import os
 import json
 import glob
@@ -340,8 +341,6 @@ def getMotHeader():
 
 
 def getCum(vals):
-    # print("printing vals:")
-    # print(vals)
     coco = COCO()
     cum = []
     n = -1
@@ -374,16 +373,16 @@ def printTable(vals, motHeader=False):
         header = getMotHeader()
     else:
         header = getHeader()
-    print(header)
-    print(row)
+    logging.info(header)
+    logging.info(row)
     return header + "\n", row + "\n"
 
 
 def printTableTracking(valsPerPart):
     cum = getCum(vals)
     row = getFormatRow(cum)
-    print(getHeader())
-    print(row)
+    logging.info(getHeader())
+    logging.info(row)
     return getHeader() + "\n", row + "\n"
 
 
@@ -460,7 +459,7 @@ def process_arguments(argv):
 def process_arguments_server(argv):
     mode = 'multi'
 
-    print(len(argv))
+    logging.debug(len(argv))
     assert len(argv) == 10, "Wrong number of arguments"
 
     gt_dir = argv[1]
@@ -729,7 +728,7 @@ def assignGTmulti(gtFrames, prFrames, distThresh):
                     if not ("score" in ppPr.keys()):
                         # use minimum score if predicted score is missing
                         if imgidx == 0:
-                            print('WARNING: prediction score is missing. Setting fallback score={}'.format(MIN_SCORE))
+                            logging.error('Prediction score is missing. Setting fallback score={}'.format(MIN_SCORE))
                         score[ridxPr, i] = MIN_SCORE
                     else:
                         score[ridxPr, i] = ppPr["score"][0]
